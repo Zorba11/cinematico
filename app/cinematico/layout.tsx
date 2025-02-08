@@ -1,9 +1,6 @@
 import { isAuthorized } from '@/utils/data/user/isAuthorized';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import ModeToggle from '@/components/mode-toggle';
-import { UserProfile } from '@/components/user-profile';
-import Link from 'next/link';
 import { Sidebar } from '../components/cinematico/sidebar';
 
 interface CinematicoLayoutProps {
@@ -23,12 +20,12 @@ export default async function CinematicoLayout({
   // }
 
   return (
-    <div className="flex h-screen overflow-hidden w-full relative">
+    <div className="flex h-screen overflow-hidden w-full relative bg-gradient-to-br from-[#1A0B3F] via-[#2D1B5A] to-[#3D2A75]">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-[#2A0B4F] ml-20">
+      <main className="flex-1 overflow-hidden ml-20 relative z-0">
         {children}
       </main>
     </div>

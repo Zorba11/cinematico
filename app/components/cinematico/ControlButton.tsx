@@ -1,4 +1,6 @@
 'use client';
+import { motion } from 'framer-motion';
+
 interface ControlButtonProps {
   label: string;
   onClick?: () => void;
@@ -6,29 +8,38 @@ interface ControlButtonProps {
 
 export function ControlButton({ label, onClick }: ControlButtonProps) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
-      className="group relative flex flex-col items-center gap-3"
+      className="px-4 py-2.5 rounded-xl bg-[#1a1a1a] text-white/80 text-sm font-medium
+                 border border-black/30 backdrop-blur-sm"
+      style={{
+        boxShadow: `
+          8px 8px 16px rgba(0, 0, 0, 0.4),
+          -4px -4px 12px rgba(255, 255, 255, 0.03),
+          inset -1px -1px 2px rgba(255, 255, 255, 0.05)
+        `,
+      }}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: `
+          12px 12px 24px rgba(0, 0, 0, 0.4),
+          -6px -6px 16px rgba(255, 255, 255, 0.03),
+          inset -1px -1px 2px rgba(255, 255, 255, 0.05)
+        `,
+      }}
+      whileTap={{
+        scale: 0.98,
+        boxShadow: `
+          inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+          inset -2px -2px 6px rgba(255, 255, 255, 0.03)
+        `,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: [0.34, 1.56, 0.64, 1],
+      }}
     >
-      <div
-        className="w-20 h-20 rounded-full bg-[#1a1a1a] flex items-center justify-center
-        shadow-[16px_16px_32px_#0a0a0a,-16px_-16px_32px_#2a2a2a]
-        hover:shadow-[12px_12px_24px_#0a0a0a,-12px_-12px_24px_#2a2a2a]
-        active:shadow-[inset_8px_8px_16px_#0a0a0a,inset_-8px_-8px_16px_#2a2a2a]
-        transition-all duration-200"
-      >
-        <div
-          className="w-12 h-12 rounded-full 
-          bg-gradient-to-br from-[#222222] to-[#1a1a1a]
-          shadow-[inset_4px_4px_8px_#0a0a0a,inset_-4px_-4px_8px_#2a2a2a]
-          flex items-center justify-center"
-        >
-          <div className="w-0.5 h-8 bg-white/10 rounded-full transform -rotate-45" />
-        </div>
-      </div>
-      <span className="text-sm tracking-wider font-medium text-white/60 group-hover:text-white/80 transition-colors">
-        {label}
-      </span>
-    </button>
+      {label}
+    </motion.button>
   );
 }

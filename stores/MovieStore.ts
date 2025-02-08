@@ -1,11 +1,12 @@
 import { makeAutoObservable } from 'mobx';
 
 export class MovieStore {
+  isPowerOn: boolean = false;
   constructor() {
     makeAutoObservable(this);
   }
 
   setPowerOn() {
-    alert('Power On');
+    this.isPowerOn = !this.isPowerOn;
   }
 }
