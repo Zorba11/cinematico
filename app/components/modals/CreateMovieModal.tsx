@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import TextInput from '../inputs/TextInput';
 import ModalButtons from '../buttons/ModalButtons';
-import ImageUpload from '../inputs/ImageUpload';
+import { useStores } from '@/hooks/useStores';
+import { toast } from 'sonner';
 
 interface CreateMovieModalProps {
   onClose: () => void;
@@ -11,13 +12,29 @@ interface CreateMovieModalProps {
 
 export default function CreateMovieModal({ onClose }: CreateMovieModalProps) {
   const [movieText, setMovieText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { rootStore } = useStores();
+  const movieStore = rootStore.movieStore;
   const MAX_CHARS = 280;
 
-  const handleSubmit = () => {
-    if (movieText.trim()) {
-      // Handle the submission here
-      console.log(movieText);
+  const handleSubmit = async () => {
+    if (!movieText.trim()) {
+      toast.error('Please enter a movie prompt');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await movieStore.createMovie({
+        moviePrompt: movieText,
+      });
+      toast.success('Movie created successfully');
       onClose();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to create movie');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -37,9 +54,12 @@ export default function CreateMovieModal({ onClose }: CreateMovieModalProps) {
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-xl p-8 rounded-3xl
                    backdrop-blur-lg bg-[rgba(255,255,255,0.03)]
-                   shadow-[16px_16px_32px_rgba(0,0,0,0.2),_-16px_-16px_32px_rgba(255,255,255,0.1)]"
+                   shadow-[20px_20px_40px_rgba(0,0,0,0.25),_-12px_-12px_24px_rgba(255,255,255,0.08)]
+                   border border-gray-200/10
+                   h-[16vw] w-[60vh]
+                   "
       >
-        <div className="space-y-6">
+        <div className="space-y-7">
           {/* Text Input Area */}
           <TextInput
             value={movieText}
@@ -52,7 +72,7 @@ export default function CreateMovieModal({ onClose }: CreateMovieModalProps) {
           />
 
           {/* Image Upload Area */}
-          <ImageUpload onImageUpload={(file) => console.log(file)} />
+          {/* <ImageUpload onImageUpload={(file) => console.log(file)} /> */}
 
           {/* Character Count and Buttons */}
           <ModalButtons

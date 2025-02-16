@@ -1,8 +1,8 @@
-"server only";
+'server only';
 
-import { db } from "@/db/drizzle";
-import { users } from "@/db/schema";
-import { userCreateProps } from "@/utils/types";
+import { db } from '@/db/drizzle';
+import { user } from '@/db/schema';
+import { userCreateProps } from '@/utils/types';
 
 export const userCreate = async ({
   email,
@@ -12,20 +12,23 @@ export const userCreate = async ({
   user_id,
 }: userCreateProps) => {
   try {
-    console.log("info", {
+    console.log('info', {
       email,
       firstName: first_name,
       lastName: last_name,
       profileImageUrl: profile_image_url,
       userId: user_id,
     });
-    const result = db.insert(users).values({
-      email,
-      firstName: first_name,
-      lastName: last_name,
-      profileImageUrl: profile_image_url,
-      userId: user_id,
-    }).returning();
+    const result = db
+      .insert(user)
+      .values({
+        email,
+        firstName: first_name,
+        lastName: last_name,
+        profileImageUrl: profile_image_url,
+        userId: user_id,
+      })
+      .returning();
 
     return result;
   } catch (error: any) {

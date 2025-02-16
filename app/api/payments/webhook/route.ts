@@ -1,8 +1,8 @@
-import { db } from "@/db/drizzle";
-import { invoices, subscriptions, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import { db } from '@/db/drizzle';
+import { invoices, subscriptions, user } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -18,23 +18,22 @@ async function getCustomerEmail(customerId: string): Promise<string | null> {
     const customer = await stripe.customers.retrieve(customerId);
     return (customer as Stripe.Customer).email;
   } catch (error) {
-    console.error("Error fetching customer:", error);
+    console.error('Error fetching customer:', error);
     return null;
   }
 }
 
 async function handleSubscriptionEvent(
   event: Stripe.Event,
-  type: "created" | "updated" | "deleted"
+  type: 'created' | 'updated' | 'deleted'
 ) {
-
   const subscription = event.data.object as Stripe.Subscription;
   const customerEmail = await getCustomerEmail(subscription.customer as string);
 
   if (!customerEmail) {
     return NextResponse.json({
       status: 500,
-      error: "Customer email could not be fetched",
+      error: 'Customer email could not be fetched',
     });
   }
 
@@ -44,31 +43,31 @@ async function handleSubscriptionEvent(
     status: subscription.status,
     startDate: new Date(subscription.created * 1000).toISOString(),
     planId: subscription.items.data[0]?.price.id,
-    userId: subscription.metadata?.userId || "",
+    userId: subscription.metadata?.userId || '',
     email: customerEmail,
   };
 
   console.log('📝 Subscription data:', subscriptionData);
 
   try {
-    if (type === "deleted") {
+    if (type === 'deleted') {
       // Update subscriptions table
       await db
         .update(subscriptions)
         .set({
-          status: "cancelled",
+          status: 'cancelled',
           email: customerEmail,
         })
         .where(eq(subscriptions.subscriptionId, subscription.id));
 
       // Update user table to remove subscription
       await db
-        .update(users)
+        .update(user)
         .set({ subscription: null })
-        .where(eq(users.email, customerEmail));
+        .where(eq(user.email, customerEmail));
     } else {
       // Either insert or update subscription based on type
-      if (type === "created") {
+      if (type === 'created') {
         const insertedData = await db
           .insert(subscriptions)
           .values(subscriptionData)
@@ -76,7 +75,7 @@ async function handleSubscriptionEvent(
 
         return NextResponse.json({
           status: 200,
-          message: "Subscription created successfully",
+          message: 'Subscription created successfully',
           data: insertedData,
         });
       } else {
@@ -88,7 +87,7 @@ async function handleSubscriptionEvent(
 
         return NextResponse.json({
           status: 200,
-          message: "Subscription updated successfully",
+          message: 'Subscription updated successfully',
           data: updatedData,
         });
       }
@@ -109,7 +108,7 @@ async function handleSubscriptionEvent(
 
 async function handleInvoiceEvent(
   event: Stripe.Event,
-  status: "succeeded" | "failed"
+  status: 'succeeded' | 'failed'
 ) {
   const invoice = event.data.object as Stripe.Invoice;
   const customerEmail = await getCustomerEmail(invoice.customer as string);
@@ -118,21 +117,23 @@ async function handleInvoiceEvent(
     email: customerEmail,
     amount: invoice.amount_paid,
     currency: invoice.currency,
-    metadata: invoice.metadata
+    metadata: invoice.metadata,
   });
 
   if (!customerEmail) {
     return NextResponse.json({
       status: 500,
-      error: "Customer email could not be fetched",
+      error: 'Customer email could not be fetched',
     });
   }
 
   const invoiceData = {
     invoiceId: invoice.id,
     subscriptionId: invoice.subscription as string,
-    amountPaid: status === "succeeded" ? String(invoice.amount_paid / 100) : undefined,
-    amountDue: status === "failed" ? String(invoice.amount_due / 100) : undefined,
+    amountPaid:
+      status === 'succeeded' ? String(invoice.amount_paid / 100) : undefined,
+    amountDue:
+      status === 'failed' ? String(invoice.amount_due / 100) : undefined,
     currency: invoice.currency,
     status,
     userId: invoice.metadata?.userId,
@@ -165,7 +166,7 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
 
   console.log('🏷️ Session metadata:', metadata);
 
-  if (metadata?.subscription === "true") {
+  if (metadata?.subscription === 'true') {
     // This is for subscription payments
     const subscriptionId = session.subscription;
     try {
@@ -180,19 +181,19 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
 
       // Update user's subscription
       await db
-        .update(users)
+        .update(user)
         .set({ subscription: session.id })
-        .where(eq(users.userId, metadata?.userId));
+        .where(eq(user.userId, metadata?.userId));
 
       return NextResponse.json({
         status: 200,
-        message: "Subscription metadata updated successfully",
+        message: 'Subscription metadata updated successfully',
       });
     } catch (error) {
-      console.error("Error updating subscription metadata:", error);
+      console.error('Error updating subscription metadata:', error);
       return NextResponse.json({
         status: 500,
-        error: "Error updating subscription metadata",
+        error: 'Error updating subscription metadata',
       });
     }
   } else {
@@ -237,11 +238,11 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
 
       return NextResponse.json({
         status: 200,
-        message: "Payment and credits updated successfully",
+        message: 'Payment and credits updated successfully',
         // updatedUser,
       });
     } catch (error) {
-      console.error("Error handling checkout session:", error);
+      console.error('Error handling checkout session:', error);
       return NextResponse.json({
         status: 500,
         error: String(error),
@@ -255,7 +256,7 @@ async function webhooksHandler(
   request: NextRequest
 ): Promise<NextResponse> {
   console.log('🎯 Processing webhook request');
-  const sig = request.headers.get("Stripe-Signature");
+  const sig = request.headers.get('Stripe-Signature');
   console.log('🔑 Stripe signature present:', !!sig);
 
   try {
@@ -268,33 +269,33 @@ async function webhooksHandler(
     console.log('✅ Event constructed successfully:', {
       type: event.type,
       id: event.id,
-      apiVersion: event.api_version
+      apiVersion: event.api_version,
     });
 
     switch (event.type) {
-      case "customer.subscription.created":
-        return handleSubscriptionEvent(event, "created");
-      case "customer.subscription.updated":
-        return handleSubscriptionEvent(event, "updated");
-      case "customer.subscription.deleted":
-        return handleSubscriptionEvent(event, "deleted");
-      case "invoice.payment_succeeded":
-        return handleInvoiceEvent(event, "succeeded");
-      case "invoice.payment_failed":
-        return handleInvoiceEvent(event, "failed");
-      case "checkout.session.completed":
+      case 'customer.subscription.created':
+        return handleSubscriptionEvent(event, 'created');
+      case 'customer.subscription.updated':
+        return handleSubscriptionEvent(event, 'updated');
+      case 'customer.subscription.deleted':
+        return handleSubscriptionEvent(event, 'deleted');
+      case 'invoice.payment_succeeded':
+        return handleInvoiceEvent(event, 'succeeded');
+      case 'invoice.payment_failed':
+        return handleInvoiceEvent(event, 'failed');
+      case 'checkout.session.completed':
         return handleCheckoutSessionCompleted(event);
       default:
         return NextResponse.json({
           status: 400,
-          error: "Unhandled event type",
+          error: 'Unhandled event type',
         });
     }
   } catch (err) {
-    console.error("Error constructing Stripe event:", err);
+    console.error('Error constructing Stripe event:', err);
     return NextResponse.json({
       status: 500,
-      error: "Webhook Error: Invalid Signature",
+      error: 'Webhook Error: Invalid Signature',
     });
   }
 }

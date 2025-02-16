@@ -5,9 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode, useState } from 'react';
 
-export default function Provider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
 
+export default function Provider({ children }: { children: ReactNode }) {
   return (
     <StoreContext.Provider
       value={{
@@ -15,7 +21,9 @@ export default function Provider({ children }: { children: ReactNode }) {
       }}
     >
       <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {/* {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )} */}
         {children}
       </QueryClientProvider>
     </StoreContext.Provider>

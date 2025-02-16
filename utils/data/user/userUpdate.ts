@@ -1,9 +1,9 @@
-"server only";
-import { db } from "@/db/drizzle";
-import { users } from "@/db/schema";
-import { userUpdateProps } from "@/utils/types";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+'server only';
+import { db } from '@/db/drizzle';
+import { user } from '@/db/schema';
+import { userUpdateProps } from '@/utils/types';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export const userUpdate = async ({
   email,
@@ -13,7 +13,7 @@ export const userUpdate = async ({
   user_id,
 }: userUpdateProps) => {
   try {
-    const result = db.update(users).set({
+    const result = db.update(user).set({
       email,
       firstName: first_name,
       lastName: last_name,

@@ -7,11 +7,13 @@ interface ImageUploadProps {
 export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
   return (
     <div
-      className="w-full h-48 border-2 border-dashed border-gray-400/30 rounded-xl
+      className="w-full h-48 rounded-2xl
                  flex flex-col items-center justify-center p-4
                  bg-[rgba(0,0,0,0.2)] backdrop-blur-sm
-                 transition-colors duration-300
-                 hover:border-gray-400/50"
+                 shadow-[inset_8px_8px_16px_rgba(0,0,0,0.2),_inset_-8px_-8px_16px_rgba(255,255,255,0.1)]
+                 group transition-all duration-300 ease-in-out
+                 hover:shadow-[inset_12px_12px_24px_rgba(0,0,0,0.25),_inset_-12px_-12px_24px_rgba(255,255,255,0.12)]
+                 relative overflow-hidden"
       onDragOver={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -33,10 +35,13 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
           if (files[0]) onImageUpload(files[0]);
         }}
       />
-      <label htmlFor="image-upload" className="cursor-pointer text-center">
-        <div className="text-gray-400 mb-2">
+      <label
+        htmlFor="image-upload"
+        className="cursor-pointer text-center w-full h-full flex flex-col items-center justify-center"
+      >
+        <div className="text-gray-400 transform group-hover:scale-105 transition-transform duration-300">
           <svg
-            className="w-10 h-10 mx-auto mb-2"
+            className="w-12 h-12 mx-auto mb-3 opacity-70 group-hover:opacity-90 transition-opacity duration-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -48,7 +53,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
               d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <p className="text-sm">
+          <p className="text-sm font-light tracking-wide">
             Drag and drop an image here, or click to select
           </p>
         </div>

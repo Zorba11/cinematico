@@ -1,56 +1,104 @@
 'use client';
-import NoiseOverlay from '../components/NoiseOverlay';
-import ColorBars from '../components/ColorBars';
-import ControlPanel from '../components/ControlPanel';
-import { useStores } from '@/hooks/useStores';
-import MovieContent from '../components/MovieContent';
-import TVStatic from '../components/TVStatic';
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AnimatePresence } from 'framer-motion';
+import ControlPanel, { DockPosition } from '../components/ControlPanel';
+import { useStores } from '@/hooks/useStores';
+import MovieContent from '../components/MovieContent';
 import MoviesDashboard from '../components/MoviesDashboard';
 import NoiseBackground from '../components/NoiseBackground';
+import 'react-resizable/css/styles.css';
 
 export default observer(function CinematicoPage() {
   const {
     rootStore: { movieStore },
   } = useStores();
-
   const isPowerOn = movieStore.isPowerOn;
+  const [dockPosition, setDockPosition] = useState<DockPosition>('bottom');
+
+  /**
+   * For left/right docking, the panel should span the full height of the TV screen,
+   * and for top/bottom docking, it should span the full width.
+   */
+  const getPanelPositionStyle = (dock: DockPosition) => {
+    switch (dock) {
+      case 'left':
+        return { left: '-280px', top: '0', bottom: '0' };
+      case 'right':
+        return { right: '-280px', top: '0', bottom: '0' };
+      case 'top':
+        return { top: '-180px', left: '0', right: '0' };
+      case 'bottom':
+        return { bottom: '-180px', left: '0', right: '0' };
+      default:
+        return {};
+    }
+  };
+
+  /**
+   * Adjust the TV screen's border radii so that the edge touching the control panel
+   * becomes straight.
+   */
+  const getTVScreenBorderClasses = (dock: DockPosition) => {
+    switch (dock) {
+      case 'left':
+        return 'rounded-tr-3xl rounded-br-3xl';
+      case 'right':
+        return 'rounded-tl-3xl rounded-bl-3xl';
+      case 'top':
+        return 'rounded-bl-3xl rounded-br-3xl';
+      case 'bottom':
+        return 'rounded-tl-3xl rounded-tr-3xl';
+      default:
+        return 'rounded-3xl';
+    }
+  };
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Position NoiseBackground */}
+      {/* Background texture */}
       <NoiseBackground />
-
-      {/* Content container with transparent background */}
-      <div className="w-full h-screen p-8 flex items-center relative z-10">
+      <div className="w-full h-screen p-8 flex items-center justify-center relative z-10">
+        {/* TV Screen container */}
         <div className="relative w-full max-w-4xl mx-auto">
-          {/* TV Container with enhanced neumorphic styling */}
           <div
-            className="rounded-3xl overflow-hidden flex flex-col relative transition-all duration-500"
+            className={`aspect-[16/9] relative w-full overflow-hidden transition-all duration-500 ${getTVScreenBorderClasses(
+              dockPosition
+            )}`}
             style={{
-              backgroundColor: '#1A0B3F',
+              backgroundColor: '#1a1a2e',
+              borderColor: 'rgba(45, 45, 65, 0.4)',
               boxShadow: `
-                16px 16px 32px rgba(0, 0, 0, 0.7),
-                -8px -8px 16px rgba(255, 255, 255, 0.05),
-                inset -2px -2px 4px rgba(255, 255, 255, 0.05),
-                inset 2px 2px 4px rgba(0, 0, 0, 0.3)
+                16px 16px 32px rgba(0, 0, 0, 0.8),
+                -8px -8px 16px rgba(255, 255, 255, 0.03),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.03),
+                inset 2px 2px 4px rgba(0, 0, 0, 0.4)
               `,
             }}
           >
-            {/* TV Screen Content */}
-            <div className="aspect-[16/9] relative w-full bg-[#000000]">
-              <div className="absolute inset-4">
-                <AnimatePresence mode="wait">
-                  {isPowerOn ? <MovieContent /> : <MoviesDashboard />}
-                </AnimatePresence>
-              </div>
-            </div>
-            {/* Control Panel */}
-            <div className="bg-[#1a1a1a] h-48 border-t border-black/50 relative z-10">
-              <ControlPanel />
+            <div className="absolute inset-4">
+              <AnimatePresence mode="wait">
+                {isPowerOn ? <MovieContent /> : <MoviesDashboard />}
+              </AnimatePresence>
             </div>
           </div>
+          {/* Render the ControlPanel either overlaid or in-flow (if undocked) */}
+          {dockPosition === 'undocked' ? (
+            <ControlPanel
+              dockPosition={dockPosition}
+              setDockPosition={setDockPosition}
+            />
+          ) : (
+            <div
+              style={getPanelPositionStyle(dockPosition)}
+              className="absolute"
+            >
+              <ControlPanel
+                dockPosition={dockPosition}
+                setDockPosition={setDockPosition}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
