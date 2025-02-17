@@ -25,9 +25,9 @@ export function PowerIndicator({ isOn, onClick }: PowerIndicatorProps) {
           `}
         />
       </div>
-      <span className="text-sm font-medium tracking-wider text-neutral-300 group-hover:text-neutral-100 transition-colors duration-300">
+      {/* <span className="text-sm font-medium tracking-wider text-neutral-300 group-hover:text-neutral-100 transition-colors duration-300">
         POWER
-      </span>
+      </span> */}
     </div>
   );
 }

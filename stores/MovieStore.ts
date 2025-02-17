@@ -15,6 +15,7 @@ export type MovieStep =
 
 export class MovieStore {
   isPowerOn: boolean = false;
+  isZeroShotMode: boolean = false;
   currentMovieId: string | null = null;
   currentStep: MovieStep = null;
 
@@ -24,6 +25,10 @@ export class MovieStore {
 
   setPowerOn() {
     this.isPowerOn = !this.isPowerOn;
+  }
+
+  toggleZeroShotMode() {
+    this.isZeroShotMode = !this.isZeroShotMode;
   }
 
   async createMovie(movieData: Pick<CreateMovieInput, 'moviePrompt'>) {
@@ -57,6 +62,16 @@ export class MovieStore {
       return movie;
     } catch (error) {
       console.error('Error creating movie:', error);
+      throw error;
+    }
+  }
+
+  async createShot() {
+    try {
+      // For now, just create a movie with a default prompt
+      await this.createMovie({ moviePrompt: 'Create a one-shot movie' });
+    } catch (error) {
+      console.error('Error creating shot:', error);
       throw error;
     }
   }

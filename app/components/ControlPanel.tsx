@@ -4,24 +4,20 @@ import { observer } from 'mobx-react-lite';
 import { PowerIndicator } from './ui/PowerIndicator';
 import { ControlDialsGrid } from './ui/ControlDialsGrid';
 import { DockingButtons } from './ui/DockingButtons';
+import { ModeToggleSwitch } from './ui/ModeToggleSwitch';
 
 // Updated dock options (bottom removed in favor of top)
 export type DockPosition = 'left' | 'right' | 'top' | 'bottom' | 'undocked';
 
-interface ControlPanelProps {
-  dockPosition: DockPosition;
-  setDockPosition: (pos: DockPosition) => void;
-}
-
-// Update constants
+// (Desktop dimensions are maintained for reference.)
 const PANEL_DIMENSIONS = {
   vertical: {
-    width: 280,
+    width: '280px',
     height: '100%', // Vertical mode spans full height of the TV screen container.
   },
   horizontal: {
     width: '100%',
-    height: 180,
+    height: '180px',
   },
 };
 
@@ -40,41 +36,50 @@ const getIntegratedClasses = () => {
 export default observer(function ControlPanel({
   dockPosition,
   setDockPosition,
-}: ControlPanelProps) {
-  const isVertical = dockPosition === 'left' || dockPosition === 'right';
-  const isHorizontal = dockPosition === 'top' || dockPosition === 'bottom';
-  const dimensions = isVertical
-    ? PANEL_DIMENSIONS.vertical
-    : PANEL_DIMENSIONS.horizontal;
-
+}: {
+  dockPosition: DockPosition;
+  setDockPosition: (pos: DockPosition) => void;
+}) {
   const {
     rootStore: { movieStore },
   } = useStores();
-
+  const isVertical = dockPosition === 'left' || dockPosition === 'right';
   const integratedClasses = getIntegratedClasses()[dockPosition] ?? '';
+  const responsiveClasses = isVertical
+    ? 'w-full sm:w-[280px] sm:h-full'
+    : 'w-full sm:h-[180px]';
 
   return (
     <div
-      className={`flex flex-col relative ${integratedClasses}`}
-      style={{ width: dimensions.width, height: dimensions.height }}
+      className={`flex flex-col relative ${integratedClasses} ${responsiveClasses}`}
     >
       <DockingButtons
         dockPosition={dockPosition}
         setDockPosition={setDockPosition}
+        isZeroShotMode={movieStore.isZeroShotMode}
+        onCreateShot={() => movieStore.createShot()}
       />
       <div
-        className={`px-8 py-4 border-b border-neutral-800/50 ${
+        className={`px-3 py-1.5 sm:px-6 sm:py-2 border-b border-neutral-800/50 ${
           isVertical ? 'w-full' : ''
         }`}
       >
-        <PowerIndicator
-          isOn={movieStore.isPowerOn}
-          onClick={() => movieStore.setPowerOn()}
-        />
+        <div className="flex items-center gap-3">
+          <PowerIndicator
+            isOn={movieStore.isPowerOn}
+            onClick={() => movieStore.setPowerOn()}
+          />
+          <ModeToggleSwitch
+            value={movieStore.isZeroShotMode}
+            onToggle={() => movieStore.toggleZeroShotMode()}
+          />
+        </div>
       </div>
       <div
-        className={`flex-1 px-4 py-4 overflow-y-auto custom-scrollbar ${
+        className={`flex-1 px-3 py-3 overflow-y-auto custom-scrollbar ${
           isVertical ? 'w-full' : ''
+        } ${
+          movieStore.isZeroShotMode ? 'flex items-center justify-center' : ''
         }`}
       >
         <ControlDialsGrid movieStore={movieStore} isVertical={isVertical} />
