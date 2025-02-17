@@ -36,9 +36,11 @@ const getIntegratedClasses = () => {
 export default observer(function ControlPanel({
   dockPosition,
   setDockPosition,
+  showArrows = false,
 }: {
   dockPosition: DockPosition;
   setDockPosition: (pos: DockPosition) => void;
+  showArrows?: boolean;
 }) {
   const {
     rootStore: { movieStore },
@@ -82,7 +84,11 @@ export default observer(function ControlPanel({
           movieStore.isZeroShotMode ? 'flex items-center justify-center' : ''
         }`}
       >
-        <ControlDialsGrid movieStore={movieStore} isVertical={isVertical} />
+        <ControlDialsGrid
+          movieStore={movieStore}
+          isVertical={isVertical}
+          showArrows={showArrows}
+        />
       </div>
     </div>
   );
