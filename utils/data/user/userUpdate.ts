@@ -1,8 +1,6 @@
 'server only';
-import { db } from '@/db/drizzle';
-import { user } from '@/db/schema';
+import { db } from '@/db/prisma';
 import { userUpdateProps } from '@/utils/types';
-import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export const userUpdate = async ({
@@ -13,12 +11,16 @@ export const userUpdate = async ({
   user_id,
 }: userUpdateProps) => {
   try {
-    const result = db.update(user).set({
-      email,
-      firstName: first_name,
-      lastName: last_name,
-      profileImageUrl: profile_image_url,
-      userId: user_id,
+    const result = await db.user.update({
+      where: {
+        userId: user_id,
+      },
+      data: {
+        email,
+        firstName: first_name,
+        lastName: last_name,
+        profileImageUrl: profile_image_url,
+      },
     });
 
     return result;

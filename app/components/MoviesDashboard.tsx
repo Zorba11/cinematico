@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import TVStatic from './TVStatic';
 import CreateMovieModal from './modals/CreateMovieModal';
+import PreviousMoviesModal from './modals/PreviousMoviesModal';
 
 export default function MoviesDashboard() {
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showPreviousMovies, setShowPreviousMovies] = useState(false);
 
   const buttonStyle = {
     boxShadow: `
@@ -60,6 +62,7 @@ export default function MoviesDashboard() {
         </motion.button>
 
         <motion.button
+          onClick={() => setShowPreviousMovies(true)}
           className="px-8 py-4 rounded-2xl font-medium text-lg backdrop-blur-md bg-[rgba(74,21,75,0.1)] text-gray-200 transition-all duration-300 ease-out"
           style={buttonStyle}
           whileHover={{
@@ -82,10 +85,13 @@ export default function MoviesDashboard() {
         </motion.button>
       </div>
 
-      {/* Create Movie Modal */}
+      {/* Modals */}
       <AnimatePresence>
         {showPrompt && (
           <CreateMovieModal onClose={() => setShowPrompt(false)} />
+        )}
+        {showPreviousMovies && (
+          <PreviousMoviesModal onClose={() => setShowPreviousMovies(false)} />
         )}
       </AnimatePresence>
     </div>

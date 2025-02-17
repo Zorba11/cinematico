@@ -13,14 +13,39 @@ export type MovieStep =
   | 'final'
   | null;
 
+// Define an interface for a movie item
+export interface Movie {
+  id: number;
+  moviePrompt: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export class MovieStore {
   isPowerOn: boolean = false;
   isZeroShotMode: boolean = false;
   currentMovieId: string | null = null;
   currentStep: MovieStep = null;
 
+  // Instead of a public property, we use a private backing field
+  private _movies: Movie[] = [];
+
+  isLoading: boolean = false;
+
   constructor() {
-    makeAutoObservable(this);
+    // autoBind ensures actions keep the correct "this" context
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  // Getter for movies – the UI components will use this to get an observable list
+  get movies() {
+    return this._movies;
+  }
+
+  // Setter for movies – any update to the list goes through here
+  set movies(movies: Movie[]) {
+    this._movies = movies;
   }
 
   setPowerOn() {
@@ -120,5 +145,34 @@ export class MovieStore {
   handleFinalClick() {
     this.currentStep = 'final';
     // Implementation coming soon
+  }
+
+  async loadPreviousMovies() {
+    this.isLoading = true;
+    try {
+      const response = await fetch('/api/movies');
+      if (!response.ok) {
+        throw new Error('Failed to fetch movies');
+      }
+      const movies = await response.json();
+
+      // If your API returns the movie field as "prompt" and your UI expects "moviePrompt",
+      // you can map the response accordingly. For example:
+      // this.movies = movies.map((m: any) => ({ ...m, moviePrompt: m.prompt }));
+      //
+      // Otherwise, if your API already returns a "moviePrompt" field, assign directly:
+      this.movies = movies;
+    } catch (error) {
+      console.error('Error loading movies:', error);
+      throw error;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  setActiveMovie(movieId: string) {
+    console.log('[moviestore] settig  movie id: ', movieId);
+    this.currentMovieId = movieId;
+    this.isPowerOn = true;
   }
 }

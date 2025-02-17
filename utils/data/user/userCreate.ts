@@ -1,7 +1,6 @@
 'server only';
 
-import { db } from '@/db/drizzle';
-import { user } from '@/db/schema';
+import { db } from '@/db/prisma';
 import { userCreateProps } from '@/utils/types';
 
 export const userCreate = async ({
@@ -19,19 +18,21 @@ export const userCreate = async ({
       profileImageUrl: profile_image_url,
       userId: user_id,
     });
-    const result = db
-      .insert(user)
-      .values({
+    const result = await db.user.create({
+      data: {
         email,
         firstName: first_name,
         lastName: last_name,
         profileImageUrl: profile_image_url,
         userId: user_id,
-      })
-      .returning();
+      },
+    });
 
     return result;
-  } catch (error: any) {
-    throw new Error(error.message);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to create user: ${error.message}`);
+    }
+    throw new Error('Failed to create user');
   }
 };

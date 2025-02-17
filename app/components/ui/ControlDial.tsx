@@ -6,6 +6,7 @@ interface ControlDialProps {
   onClick: () => void;
   isActive?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
 }
 
 const sizeClasses = {
@@ -32,47 +33,57 @@ export function ControlDial({
   onClick,
   isActive = false,
   size = 'md',
+  disabled = false,
 }: ControlDialProps) {
   return (
     <div className="flex flex-col items-center gap-2 sm:gap-3">
       <button
         onClick={onClick}
+        disabled={disabled}
         className={`
           ${sizeClasses[size]} 
           rounded-full 
           transform transition-all duration-300 ease-out
           bg-[#1A0B3F]
-          shadow-[4px_4px_10px_rgba(0,0,0,0.5),-4px_-4px_10px_rgba(255,255,255,0.1)]
-          hover:shadow-[2px_2px_5px_rgba(0,0,0,0.5),-2px_-2px_5px_rgba(255,255,255,0.1)]
-          active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]
+          ${
+            disabled
+              ? 'opacity-50 cursor-not-allowed shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.05)]'
+              : `
+                shadow-[4px_4px_10px_rgba(0,0,0,0.5),-4px_-4px_10px_rgba(255,255,255,0.1)]
+                hover:shadow-[2px_2px_5px_rgba(0,0,0,0.5),-2px_-2px_5px_rgba(255,255,255,0.1)]
+                active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]
+                hover:scale-[1.02] active:scale-[0.98]
+              `
+          }
           flex items-center justify-center relative
           focus:outline-none
           ${
-            isActive
+            isActive && !disabled
               ? 'border-2 border-emerald-500/50'
               : 'border border-neutral-700'
           }
           ${
-            isActive
+            isActive && !disabled
               ? 'after:absolute after:inset-0 after:rounded-full after:bg-emerald-500/5'
               : ''
           }
-          hover:scale-[1.02] active:scale-[0.98]
         `}
       >
         <Icon
           className={`${iconSizes[size]} transition-colors duration-300 ${
-            isActive ? 'text-emerald-400' : 'text-neutral-300'
-          }`}
+            isActive && !disabled ? 'text-emerald-400' : 'text-neutral-300'
+          } ${disabled ? 'opacity-50' : ''}`}
         />
       </button>
       <span
         className={`
-          ${
-            labelSizes[size]
-          } font-medium tracking-wide transition-colors duration-300 ${
-          isActive ? 'text-emerald-400' : 'text-neutral-300'
-        }
+          ${labelSizes[size]} 
+          font-medium 
+          tracking-wide 
+          transition-colors 
+          duration-300 
+          ${isActive && !disabled ? 'text-emerald-400' : 'text-neutral-300'}
+          ${disabled ? 'opacity-50' : ''}
         `}
       >
         {label}

@@ -1,10 +1,8 @@
 'server only';
 
 import config from '@/config';
-import { db } from '@/db/drizzle';
-import { users } from '@/db/schema';
+import { db } from '@/db/prisma';
 import { clerkClient } from '@clerk/nextjs/server';
-import { eq } from 'drizzle-orm';
 
 export const isAuthorized = async (
   userId: string
@@ -28,9 +26,23 @@ export const isAuthorized = async (
   }
 
   try {
-    const data = await db.select().from(users).where(eq(users.userUid, userId));
+    const user = await db.user.findUnique({
+      where: {
+        userId: userId,
+      },
+      select: {
+        subscriptions: {
+          where: {
+            endDate: {
+              gte: new Date(),
+            },
+            status: 'active',
+          },
+        },
+      },
+    });
 
-    if (data?.[0]?.subscription) {
+    if (user?.subscriptions?.length > 0) {
       return {
         authorized: true,
         message: 'User is authorized',
@@ -41,10 +53,16 @@ export const isAuthorized = async (
       authorized: false,
       message: 'User is not subscribed',
     };
-  } catch (error: any) {
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        authorized: false,
+        message: error.message,
+      };
+    }
     return {
       authorized: false,
-      message: error.message,
+      message: 'An error occurred while checking authorization',
     };
   }
 };

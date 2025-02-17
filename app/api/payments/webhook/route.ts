@@ -1,4 +1,4 @@
-import { db } from '@/db/drizzle';
+import { db } from '@/db/prisma';
 import { invoices, subscriptions, user } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';

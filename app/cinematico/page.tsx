@@ -56,10 +56,8 @@ export default observer(function CinematicoPage() {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Background texture */}
       <NoiseBackground />
-      <div className="w-full h-screen p-4 sm:p-8 flex items-center justify-center relative z-10">
-        {/* TV Screen container: full width on mobile and max width on larger screens */}
+      <div className="w-full h-screen p-4 sm:p-8 pt-10 flex items-start top-10 justify-center relative z-10">
         <div className="relative w-full max-w-full sm:max-w-4xl mx-auto">
           <div
             className={`aspect-[16/9] relative w-full overflow-hidden transition-all duration-500 ${getTVScreenBorderClasses(

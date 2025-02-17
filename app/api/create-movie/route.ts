@@ -1,53 +1,44 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { movie, users } from '@/db/schema';
 import { createMovieSchema } from '@/lib/validations/movie';
-import { eq } from 'drizzle-orm';
-import { db } from '@/db/drizzle';
-import { user } from '@/db/migrations/schema';
-import { isAuthorized } from '@/utils/data/user/isAuthorized';
+import { db } from '@/db/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    // const isAuthorizedUser = await isAuthorized(userId!);
+    const { userId: clerkUserId } = await auth();
 
-    // if (isAuthorizedUser.authorized === false) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await req.json();
-
-    // Validate request body
-    const validatedData = createMovieSchema.parse(body);
-
-    // Get user ID from database based on Clerk user ID
-    const dbUser = await db.query.users.findFirst({
-      where: eq(users.userId, userId),
+    // Get or create user in database
+    const user = await db.user.upsert({
+      where: { userId: clerkUserId },
+      update: {},
+      create: {
+        userId: clerkUserId,
+        email: 'placeholder@email.com', // You'll need to get this from Clerk
+        firstName: 'placeholder', // You'll need to get this from Clerk
+        lastName: 'placeholder', // You'll need to get this from Clerk
+      },
     });
 
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const body = await req.json();
+    const validatedData = createMovieSchema.parse(body);
 
-    // Create movie
-    const [newMovie] = await db
-      .insert(movie)
-      .values({
-        userId: dbUser.id,
+    // Create a new movie record using the database user ID
+    const newMovie = await db.movie.create({
+      data: {
+        userId: user.id, // Now using the integer ID from our database
         prompt: validatedData.moviePrompt,
         promptCharacterCount: validatedData.promptCharacterCount,
         promptCharacterCountLimit: validatedData.promptCharacterCountLimit,
         storyStructureStyle: validatedData.storyStructureStyle,
         animationStyle: validatedData.animationStyle,
-        title: `Movie ${Date.now()}`, // Placeholder title, can be updated later
+        title: `Movie ${Date.now()}`,
         isAllAssetReady: false,
-      })
-      .returning();
+      },
+    });
 
     console.log('[create-movie] new movie created: ', newMovie);
 

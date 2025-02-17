@@ -127,6 +127,7 @@ export const ControlDialsGrid = observer(
               onClick={() => movieStore[handler]()}
               isActive={movieStore.currentStep === step}
               size={getDialSize()}
+              disabled={!movieStore.isPowerOn}
             />
           ))}
         </div>
