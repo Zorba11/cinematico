@@ -19,6 +19,10 @@ interface ControlDialsGridProps {
   isVertical: boolean;
 }
 
+type MovieStoreHandlers = {
+  [K in keyof MovieStore]: MovieStore[K] extends Function ? K : never;
+}[keyof MovieStore];
+
 export const ControlDialsGrid = observer(
   ({ movieStore, isVertical }: ControlDialsGridProps) => {
     const getDialSize = () => {
@@ -40,67 +44,61 @@ export const ControlDialsGrid = observer(
 
     const regularModeButtons = [
       {
+        label: 'Actors',
+        icon: UserIcon,
+        step: 'actors',
+        handler: 'handleActorsClick' as MovieStoreHandlers,
+      },
+      {
         label: 'IDEA',
         icon: LightBulbIcon,
         step: 'idea',
-        handler: 'handleIdeaClick',
-      },
-      {
-        label: 'CHARACTER',
-        icon: UserIcon,
-        step: 'character',
-        handler: 'handleCharacterClick',
-      },
-      {
-        label: 'STORY',
-        icon: DocumentTextIcon,
-        step: 'story',
-        handler: 'handleStoryClick',
+        handler: 'handleIdeaClick' as MovieStoreHandlers,
       },
       {
         label: 'SCRIPT',
-        icon: DocumentIcon,
+        icon: DocumentTextIcon,
         step: 'script',
-        handler: 'handleScriptClick',
+        handler: 'handleScriptClick' as MovieStoreHandlers,
       },
       {
-        label: 'STORYBOARD',
+        label: 'FRAMES',
         icon: PhotoIcon,
-        step: 'storyboard',
-        handler: 'handleStoryboardClick',
+        step: 'frames',
+        handler: 'handleFramesClick' as MovieStoreHandlers,
       },
       {
         label: 'MUSIC',
         icon: MusicalNoteIcon,
         step: 'music',
-        handler: 'handleMusicClick',
+        handler: 'handleMusicClick' as MovieStoreHandlers,
       },
       {
-        label: 'VOICE',
+        label: 'DIALOGUES',
         icon: ChatBubbleLeftRightIcon,
-        step: 'voice',
-        handler: 'handleVoiceClick',
+        step: 'dialogues',
+        handler: 'handleDialoguesClick' as MovieStoreHandlers,
+      },
+      {
+        label: 'SHOTS',
+        icon: FilmIcon,
+        step: 'shots',
+        handler: 'handleShotsClick' as MovieStoreHandlers,
       },
       {
         label: 'RENDER',
-        icon: FilmIcon,
-        step: 'render',
-        handler: 'handleRenderClick',
-      },
-      {
-        label: 'FINISH',
         icon: CheckCircleIcon,
-        step: 'finish',
-        handler: 'handleFinishClick',
+        step: 'render',
+        handler: 'handleRenderClick' as MovieStoreHandlers,
       },
-    ];
+    ] as const;
 
     const zeroShotButton = [
       {
         label: 'CREATE IN ZERO SHOT',
         icon: SparklesIcon,
         step: 'zeroshot',
-        handler: 'createShot',
+        handler: 'createShot' as MovieStoreHandlers,
       },
     ];
 

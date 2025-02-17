@@ -2,8 +2,14 @@
 import { motion } from 'framer-motion';
 import ColorBars from './ColorBars';
 import GuidanceMessage from './GuidanceMessage';
+import { observer } from 'mobx-react-lite';
+import { useStores } from '@/hooks/useStores';
+import { StepRenderer } from './movie-steps/StepRenderer';
 
-export default function MovieContent() {
+const MovieContent = observer(() => {
+  const { rootStore } = useStores();
+  const movieStore = rootStore.movieStore;
+
   return (
     <motion.div
       className="relative w-full h-full bg-black"
@@ -20,8 +26,16 @@ export default function MovieContent() {
         scale: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] },
       }}
     >
-      <ColorBars />
-      <GuidanceMessage />
+      {movieStore.currentStep ? (
+        <StepRenderer currentStep={movieStore.currentStep} />
+      ) : (
+        <>
+          <ColorBars />
+          <GuidanceMessage />
+        </>
+      )}
     </motion.div>
   );
-}
+});
+
+export default MovieContent;

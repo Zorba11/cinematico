@@ -14,7 +14,7 @@ export default observer(function CinematicoPage() {
     rootStore: { movieStore },
   } = useStores();
   const isPowerOn = movieStore.isPowerOn;
-  const [dockPosition, setDockPosition] = useState<DockPosition>('bottom');
+  const [dockPosition, setDockPosition] = useState<DockPosition>('left');
 
   /**
    * For left/right docking, the panel should span the full height of the TV screen,

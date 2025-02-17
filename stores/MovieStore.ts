@@ -3,14 +3,14 @@ import { CreateMovieInput, createMovieSchema } from '@/lib/validations/movie';
 
 export type MovieStep =
   | 'idea'
-  | 'character'
+  | 'actors'
   | 'script'
   | 'screenplay'
-  | 'shots'
+  | 'frames' // base scene image
   | 'music'
   | 'dialogues'
-  | 'assets'
-  | 'final'
+  | 'shots'
+  | 'render'
   | null;
 
 // Define an interface for a movie item
@@ -107,8 +107,8 @@ export class MovieStore {
     // Implementation coming soon
   }
 
-  handleCharacterClick() {
-    this.currentStep = 'character';
+  handleActorsClick() {
+    this.currentStep = 'actors';
     // Implementation coming soon
   }
 
@@ -127,6 +127,10 @@ export class MovieStore {
     // Implementation coming soon
   }
 
+  handleFramesClick() {
+    this.currentStep = 'frames';
+  }
+
   handleMusicClick() {
     this.currentStep = 'music';
     // Implementation coming soon
@@ -137,13 +141,8 @@ export class MovieStore {
     // Implementation coming soon
   }
 
-  handleAssetsClick() {
-    this.currentStep = 'assets';
-    // Implementation coming soon
-  }
-
-  handleFinalClick() {
-    this.currentStep = 'final';
+  handleRenderClick() {
+    this.currentStep = 'render';
     // Implementation coming soon
   }
 
