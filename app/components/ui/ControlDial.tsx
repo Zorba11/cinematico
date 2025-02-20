@@ -5,6 +5,7 @@ interface ControlDialProps {
   icon: React.ElementType;
   onClick: () => void;
   isActive?: boolean;
+  isCompleted?: boolean;
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }
@@ -32,6 +33,7 @@ export function ControlDial({
   icon: Icon,
   onClick,
   isActive = false,
+  isCompleted = false,
   size = 'md',
   disabled = false,
 }: ControlDialProps) {
@@ -60,20 +62,47 @@ export function ControlDial({
           ${
             isActive && !disabled
               ? 'border-2 border-emerald-500/50'
+              : isCompleted && !disabled
+              ? 'border-2 border-blue-400/50'
               : 'border border-neutral-700'
           }
           ${
             isActive && !disabled
               ? 'after:absolute after:inset-0 after:rounded-full after:bg-emerald-500/5'
+              : isCompleted && !disabled
+              ? 'after:absolute after:inset-0 after:rounded-full after:bg-blue-400/5'
               : ''
           }
         `}
       >
-        <Icon
-          className={`${iconSizes[size]} transition-colors duration-300 ${
-            isActive && !disabled ? 'text-emerald-400' : 'text-neutral-300'
-          } ${disabled ? 'opacity-50' : ''}`}
-        />
+        <div className="relative">
+          <Icon
+            className={`${iconSizes[size]} transition-colors duration-300 ${
+              isActive && !disabled
+                ? 'text-emerald-400'
+                : isCompleted && !disabled
+                ? 'text-blue-400'
+                : 'text-neutral-300'
+            } ${disabled ? 'opacity-50' : ''}`}
+          />
+          {isCompleted && !disabled && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full flex items-center justify-center">
+              <svg
+                className="w-2 h-2 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
       </button>
       <span
         className={`
@@ -82,7 +111,13 @@ export function ControlDial({
           tracking-wide 
           transition-colors 
           duration-300 
-          ${isActive && !disabled ? 'text-emerald-400' : 'text-neutral-300'}
+          ${
+            isActive && !disabled
+              ? 'text-emerald-400'
+              : isCompleted && !disabled
+              ? 'text-blue-400'
+              : 'text-neutral-300'
+          }
           ${disabled ? 'opacity-50' : ''}
         `}
       >

@@ -12,7 +12,7 @@ const MovieContent = observer(() => {
 
   return (
     <motion.div
-      className="relative w-full h-full bg-black"
+      className="relative w-full h-full bg-black flex items-center justify-center"
       style={{
         boxShadow:
           'inset 4px 4px 8px rgba(0,0,0,0.5), inset -4px -4px 8px rgba(255,255,255,0.05)',
@@ -26,14 +26,19 @@ const MovieContent = observer(() => {
         scale: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] },
       }}
     >
-      {movieStore.currentStep ? (
-        <StepRenderer currentStep={movieStore.currentStep} />
-      ) : (
-        <>
-          <ColorBars />
-          <GuidanceMessage />
-        </>
-      )}
+      <div className="w-full h-full flex items-center justify-center">
+        {movieStore.currentStep ? (
+          <StepRenderer
+            movieStore={movieStore}
+            currentStep={movieStore.currentStep}
+          />
+        ) : (
+          <>
+            <ColorBars />
+            <GuidanceMessage />
+          </>
+        )}
+      </div>
     </motion.div>
   );
 });

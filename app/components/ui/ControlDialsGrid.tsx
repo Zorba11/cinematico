@@ -84,48 +84,63 @@ export const ControlDialsGrid = observer(
         icon: UserIcon,
         step: 'actors',
         handler: 'handleActorsClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isActorSelected,
       },
       {
         label: 'Idea',
         icon: LightBulbIcon,
         step: 'idea',
         handler: 'handleIdeaClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isIdeaSelected,
       },
       {
         label: 'Script',
         icon: DocumentTextIcon,
         step: 'script',
         handler: 'handleScriptClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isScriptSelected,
+      },
+      {
+        label: 'Screenplay',
+        icon: DocumentIcon,
+        step: 'screenplay',
+        handler: 'handleScreenplayClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isScreenplaySelected,
       },
       {
         label: 'Frames',
         icon: PhotoIcon,
         step: 'frames',
         handler: 'handleFramesClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isFramesSelected,
       },
       {
         label: 'Music',
         icon: MusicalNoteIcon,
         step: 'music',
         handler: 'handleMusicClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isMusicSelected,
       },
       {
         label: 'Dialogues',
         icon: ChatBubbleLeftRightIcon,
         step: 'dialogues',
         handler: 'handleDialoguesClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isDialoguesSelected,
       },
       {
         label: 'Shots',
         icon: FilmIcon,
         step: 'shots',
         handler: 'handleShotsClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isShotsSelected,
       },
       {
         label: 'Render',
         icon: CheckCircleIcon,
         step: 'render',
         handler: 'handleRenderClick' as MovieStoreHandlers,
+        isCompleted: movieStore.isRenderCompleted,
       },
     ] as const;
 
@@ -192,13 +207,14 @@ export const ControlDialsGrid = observer(
             movieStore.isZeroShotMode ? 'w-fit' : 'w-full'
           }`}
         >
-          {buttons.map(({ label, icon, step, handler }, index) => (
+          {buttons.map(({ label, icon, step, handler, isCompleted }, index) => (
             <div key={label} className="relative">
               <ControlDial
                 label={label}
                 icon={icon}
                 onClick={() => movieStore[handler]()}
                 isActive={movieStore.currentStep === step}
+                isCompleted={isCompleted}
                 size={getDialSize()}
                 disabled={!movieStore.isPowerOn}
               />

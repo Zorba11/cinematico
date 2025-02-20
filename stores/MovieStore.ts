@@ -1,32 +1,14 @@
 import { makeAutoObservable } from 'mobx';
 import { CreateMovieInput, createMovieSchema } from '@/lib/validations/movie';
-
-export type MovieStep =
-  | 'idea'
-  | 'actors'
-  | 'script'
-  | 'screenplay'
-  | 'frames' // base scene image
-  | 'music'
-  | 'dialogues'
-  | 'shots'
-  | 'render'
-  | null;
-
-// Define an interface for a movie item
-export interface Movie {
-  id: number;
-  moviePrompt: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Actor, Movie, MovieStep } from '@/types/MovieTypes';
 
 export class MovieStore {
   isPowerOn: boolean = false;
   isZeroShotMode: boolean = false;
   currentMovieId: string | null = null;
   currentStep: MovieStep = null;
+
+  private _actors: Actor[] = [];
 
   // Instead of a public property, we use a private backing field
   private _movies: Movie[] = [];
@@ -36,6 +18,10 @@ export class MovieStore {
   constructor() {
     // autoBind ensures actions keep the correct "this" context
     makeAutoObservable(this, {}, { autoBind: true });
+
+    // TODO:these function calling sequence should be optimized later
+    this.loadActors();
+    this.loadPreviousMovies();
   }
 
   // Getter for movies – the UI components will use this to get an observable list
@@ -43,13 +29,32 @@ export class MovieStore {
     return this._movies;
   }
 
+  get actors() {
+    return this._actors;
+  }
+
   // Setter for movies – any update to the list goes through here
-  set movies(movies: Movie[]) {
+  setMovies(movies: Movie[]) {
     this._movies = movies;
+  }
+
+  setActors(actors: Actor[]) {
+    this._actors = actors;
+  }
+
+  setCurrentMovieId(id: string) {
+    this.currentMovieId = id;
   }
 
   setPowerOn() {
     this.isPowerOn = !this.isPowerOn;
+
+    // Auto-select the latest movie when turning power on
+    if (this.isPowerOn && !this.currentMovieId) {
+      const latestMovie = this._movies[0]; // Already sorted by latest in the API
+      console.log(`Auto-selecting movie ID: ${latestMovie.id}`);
+      this.setActiveMovie(latestMovie.id.toString());
+    }
   }
 
   toggleZeroShotMode() {
@@ -82,7 +87,7 @@ export class MovieStore {
 
       const movie = await response.json();
       this.setPowerOn();
-      this.currentMovieId = movie.id.toString();
+      this.setCurrentMovieId(movie.id.toString());
 
       return movie;
     } catch (error) {
@@ -91,7 +96,7 @@ export class MovieStore {
     }
   }
 
-  async createShot() {
+  async createZeroShotMovie() {
     try {
       // For now, just create a movie with a default prompt
       await this.createMovie({ moviePrompt: 'Create a one-shot movie' });
@@ -154,13 +159,7 @@ export class MovieStore {
         throw new Error('Failed to fetch movies');
       }
       const movies = await response.json();
-
-      // If your API returns the movie field as "prompt" and your UI expects "moviePrompt",
-      // you can map the response accordingly. For example:
-      // this.movies = movies.map((m: any) => ({ ...m, moviePrompt: m.prompt }));
-      //
-      // Otherwise, if your API already returns a "moviePrompt" field, assign directly:
-      this.movies = movies;
+      this.setMovies(movies);
     } catch (error) {
       console.error('Error loading movies:', error);
       throw error;
@@ -172,6 +171,60 @@ export class MovieStore {
   setActiveMovie(movieId: string) {
     console.log('[moviestore] settig  movie id: ', movieId);
     this.currentMovieId = movieId;
-    this.isPowerOn = true;
+  }
+
+  get isActorSelected() {
+    if (!this.currentMovieId) return false;
+    return this.currentMovie?.actorId !== undefined;
+  }
+
+  // Add this new getter to easily check if a specific actor is selected
+  isActorSelectedById(actorId: number) {
+    return this.currentMovie?.actorId === actorId;
+  }
+
+  get currentMovie(): Movie | null {
+    return (
+      this.movies.find(
+        (movie) => movie.id.toString() === this.currentMovieId
+      ) ?? null
+    );
+  }
+
+  async selectActor(actorId: number): Promise<boolean> {
+    if (!this.currentMovieId) return false;
+
+    try {
+      const response = await fetch(
+        `/api/movies/${this.currentMovieId}/select-actor`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ actorId }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to select actor');
+      }
+
+      return true; // Explicitly return true on success
+    } catch (error) {
+      console.error('Error selecting actor:', error);
+      throw error;
+    }
+  }
+
+  private async loadActors() {
+    try {
+      const response = await fetch('/api/actors');
+      const data = await response.json();
+      this.setActors(data);
+    } catch (error) {
+      console.error('Error loading actors:', error);
+    }
   }
 }

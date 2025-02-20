@@ -92,6 +92,8 @@ model Movie {
   isAllAssetReady           Boolean  @default(false) @map("is_all_asset_ready")
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @default(now()) @map("updated_at")
+  actorId                   Int?     @map("actor_id")
+  actor                     Actor?   @relation(fields: [actorId], references: [id])
 
   user                User                  @relation(fields: [userId], references: [id])
   top10Ideas          Top10Idea[]
@@ -318,4 +320,15 @@ model SubscriptionPlan {
   subscriptions Subscription[]
 
   @@map("subscription_plans")
+}
+
+model Actor {
+  id          Int      @id @default(autoincrement())
+  name        String
+  portraitUrl String?  @map("portrait_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  movies      Movie[]
+
+  @@map("actors")
 }

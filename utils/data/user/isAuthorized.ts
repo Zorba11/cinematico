@@ -7,7 +7,6 @@ import { clerkClient } from '@clerk/nextjs/server';
 export const isAuthorized = async (
   userId: string
 ): Promise<{ authorized: boolean; message: string }> => {
-  console.log('GET HIT');
   if (!config?.payments?.enabled) {
     console.log('Payments are disabled');
     return {

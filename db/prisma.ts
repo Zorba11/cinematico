@@ -1,12 +1,32 @@
 import { PrismaClient } from '@prisma/client';
 
-const db = new PrismaClient();
+// Declare global variable for prisma instance
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-// Optional: Immediately test the connection.
-// In many applications, you may instead connect when needed.
-db.$connect().catch((error) => {
-  console.error('Error connecting to the database:', error);
+// Create a singleton instance of PrismaClient
+const db =
+  global.prisma ||
+  new PrismaClient({
+    log: ['error', 'warn'],
+  });
+
+// In development, save the prisma instance to global
+if (process.env.NODE_ENV === 'development') {
+  global.prisma = db;
+}
+
+// Graceful connection handling
+try {
+  await db.$connect();
+} catch (error) {
+  if (error instanceof Error) {
+    console.error('Failed to connect to the database:', error.message);
+  } else {
+    console.error('An unexpected error occurred:', error);
+  }
   process.exit(1);
-});
+}
 
 export { db };

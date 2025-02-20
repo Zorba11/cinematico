@@ -59,7 +59,7 @@ export default observer(function ControlPanel({
         dockPosition={dockPosition}
         setDockPosition={setDockPosition}
         isZeroShotMode={movieStore.isZeroShotMode}
-        onCreateShot={() => movieStore.createShot()}
+        onCreateShot={() => movieStore.createZeroShotMovie()}
       />
       <div
         className={`px-3 py-1.5 sm:px-6 sm:py-2 border-b border-neutral-800/50 ${
