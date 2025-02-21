@@ -84,6 +84,7 @@ model Movie {
   title                     String
   userId                    Int
   prompt                    String
+  ideasAgentSystemPrompt    String?
   productImageUrl           String?  @map("product_image_url")
   promptCharacterCount      Int      @map("prompt_character_count")
   promptCharacterCountLimit Int      @map("prompt_character_count_limit")
@@ -331,4 +332,14 @@ model Actor {
   movies      Movie[]
 
   @@map("actors")
+}
+
+model AgentPrompts {
+  id        Int      @id @default(autoincrement())
+  name      String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("agent_prompts")
 }
